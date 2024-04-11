@@ -13,3 +13,26 @@ On the other side of the spectrum, current invisible watermarking techniques are
 
 ## References
 
+### Similar technolgies
+[ArtShield](https://artshield.io/)
+
+[Glaze](https://glaze.cs.uchicago.edu/index.html)
+
+[Sanative AI](https://app.sanative.ai/)
+
+### Papers
+
+[On the Effectiveness of Visible Watermarks](https://openaccess.thecvf.com/content_cvpr_2017/papers/Dekel_On_the_Effectiveness_CVPR_2017_paper.pdf)
+
+[Report on Watermarking Benchmarking And Steganalysis](http://omen.cs.uni-magdeburg.de/ecrypt/deliverables/DWVL16_final.pdf)
+
+[Visible Watermark Detection in Images](https://cseweb.ucsd.edu//~sag043/static/pdfs/WatermarkDetection.pdf)
+
+### Repositories of interest
+
+[rohitrango/automatic-watermark-detection](https://github.com/rohitrango/automatic-watermark-detection?tab=readme-ov-file)
+
+[LAION-AI/watermark-detection](https://github.com/LAION-AI/watermark-detection)
+
+
+
