@@ -13,7 +13,7 @@ On the other side of the spectrum, current invisible watermarking techniques are
 
 ## References
 
-### Similar technolgies
+### Similar Technologies
 [ArtShield](https://artshield.io/)
 
 [Glaze](https://glaze.cs.uchicago.edu/index.html)
@@ -30,7 +30,7 @@ On the other side of the spectrum, current invisible watermarking techniques are
 
 [Visible Watermark Detection in Images](https://cseweb.ucsd.edu//~sag043/static/pdfs/WatermarkDetection.pdf)
 
-### Repositories of interest
+### Repositories of Interest
 
 [umd-huang-lab/WAVES](https://github.com/umd-huang-lab/WAVES)
 
