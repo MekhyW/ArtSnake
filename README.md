@@ -22,6 +22,8 @@ On the other side of the spectrum, current invisible watermarking techniques are
 
 ### Papers
 
+[Benchmarking the Robustness of Image Watermarks](https://arxiv.org/pdf/2401.08573.pdf)
+
 [On the Effectiveness of Visible Watermarks](https://openaccess.thecvf.com/content_cvpr_2017/papers/Dekel_On_the_Effectiveness_CVPR_2017_paper.pdf)
 
 [Report on Watermarking Benchmarking And Steganalysis](http://omen.cs.uni-magdeburg.de/ecrypt/deliverables/DWVL16_final.pdf)
@@ -29,6 +31,8 @@ On the other side of the spectrum, current invisible watermarking techniques are
 [Visible Watermark Detection in Images](https://cseweb.ucsd.edu//~sag043/static/pdfs/WatermarkDetection.pdf)
 
 ### Repositories of interest
+
+[umd-huang-lab/WAVES](https://github.com/umd-huang-lab/WAVES)
 
 [rohitrango/automatic-watermark-detection](https://github.com/rohitrango/automatic-watermark-detection?tab=readme-ov-file)
 
