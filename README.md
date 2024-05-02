@@ -13,7 +13,7 @@ On the other side of the spectrum, current invisible watermarking techniques are
 
 ## References
 
-### Similar Technologies
+### Technologies of Interest
 [ArtShield](https://artshield.io/)
 
 [Glaze](https://glaze.cs.uchicago.edu/index.html)
@@ -38,5 +38,4 @@ On the other side of the spectrum, current invisible watermarking techniques are
 
 [LAION-AI/watermark-detection](https://github.com/LAION-AI/watermark-detection)
 
-
-
+[EspacioLatente/Glaze](https://github.com/EspacioLatente/Glaze)
