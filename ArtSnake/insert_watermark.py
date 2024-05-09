@@ -1,4 +1,8 @@
+import cv2
 from PIL import ImageFont, ImageDraw, Image
+import numpy as np
+import random
+import os
 
 def fit_text_in_box(font, bounding_box, text):
     x, y, w, h = bounding_box
@@ -32,10 +36,24 @@ def fit_text_in_box(font, bounding_box, text):
 def insert_text_pass(img):
     return img
 
+def insert_text_simple(img, text, font_path, font_size=30):
+    pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    draw = ImageDraw.Draw(pil_img)
+    font_size, lines, vertical_offset = fit_text_in_box(font_path, (0, 0, pil_img.width, pil_img.height), text)
+    font = ImageFont.truetype(font_path, font_size)
+    x = 0
+    y = (pil_img.height - font_size) // 2
+    bg_color = tuple(img.mean(axis=(0, 1)).astype(int))
+    text_color = (255, 255, 255) if sum(bg_color) < 383 else (0, 0, 0)
+    draw.text((x, y), text, font=font, fill=text_color)
+    return cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+
 if __name__ == '__main__':
-    import cv2
-    img = cv2.imread('image1.jpg')
-    img = insert_text_pass(img)
-    cv2.imshow('image', img)
+    font = os.path.join('fonts', random.choice(os.listdir('fonts')))
+    img = cv2.imread('example.jpg')
+    img1 = insert_text_pass(img)
+    img2 = insert_text_simple(img, 'Lorem ipsum', font)
+    cv2.imshow('insert_text_pass', img1)
+    cv2.imshow('insert_text_simple', img2)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
