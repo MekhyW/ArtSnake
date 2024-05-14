@@ -33,26 +33,38 @@ def fit_text_in_box(font, bounding_box, text):
             vertical_offset = (h - total_text_height) // 2
     return best_font_size, best_text_lines, vertical_offset
 
-def insert_text_pass(img):
+def create_watermark_from_text(text, font_path, image_width, image_height):
+    pil_img = Image.new('RGB', (image_width, image_height), (0, 0, 0))
+    draw = ImageDraw.Draw(pil_img)
+    font_size, lines, vertical_offset = fit_text_in_box(font_path, (0, 0, image_width, image_height), text)
+    font = ImageFont.truetype(font_path, font_size)
+    y = vertical_offset
+    for line in lines:
+        text_width, text_height = draw.textbbox((0, 0), line, font=font)[2:]
+        x = (image_width - text_width) // 2
+        draw.text((x, y), line, font=font, fill=(255, 255, 255))
+        y += text_height
+    return pil_img
+
+def insert_text_pass(img, watermark):
     return img
 
-def insert_text_simple(img, text, font_path, font_size=30):
-    pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    draw = ImageDraw.Draw(pil_img)
-    font_size, lines, vertical_offset = fit_text_in_box(font_path, (0, 0, pil_img.width, pil_img.height), text)
-    font = ImageFont.truetype(font_path, font_size)
-    x = 0
-    y = (pil_img.height - font_size) // 2
-    bg_color = tuple(img.mean(axis=(0, 1)).astype(int))
-    text_color = (255, 255, 255) if sum(bg_color) < 383 else (0, 0, 0)
-    draw.text((x, y), text, font=font, fill=text_color)
-    return cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+def insert_text_simple(img, watermark):
+    cv_img = np.array(watermark)
+    cv_img = cv2.cvtColor(cv_img, cv2.COLOR_RGB2BGR)
+    mask = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+    mask = cv2.bitwise_not(mask)
+    mask = cv2.merge([mask, mask, mask])
+    img = cv2.bitwise_and(img, mask)
+    img = cv2.add(img, cv_img)
+    return img
 
 if __name__ == '__main__':
     font = os.path.join('fonts', random.choice(os.listdir('fonts')))
     img = cv2.imread('example.jpg')
-    img1 = insert_text_pass(img)
-    img2 = insert_text_simple(img, 'Lorem ipsum', font)
+    watermark = create_watermark_from_text('Lorem ipsum', font, img.shape[1], img.shape[0])
+    img1 = insert_text_pass(img, watermark)
+    img2 = insert_text_simple(img, watermark)
     cv2.imshow('insert_text_pass', img1)
     cv2.imshow('insert_text_simple', img2)
     cv2.waitKey(0)
