@@ -7,7 +7,7 @@ def parse_requirements(file_path):
     
 requirements = parse_requirements('requirements.txt')
 
-subprocess.run(['git', 'clone', 'https://github.com/username/repository.git'])
+subprocess.run(['git', 'clone', 'https://github.com/vinthony/deep-blind-watermark-removal.git'])
 
 setup(
     name='ArtSnake',
