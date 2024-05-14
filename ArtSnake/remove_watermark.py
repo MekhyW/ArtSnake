@@ -23,11 +23,12 @@ def seed_everything(seed):
 
 seed_everything(18)
 
-resume_path = '27kpng_model_best.pth.tar'
+resume_path = 'data\\27kpng_model_best.pth.tar'
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def load_model():
-      model = models.__dict__['vvv4n']().cuda()
-      model.load_state_dict(torch.load(resume_path)['state_dict'])
+      model = models.__dict__['vvv4n']().to(device)
+      model.load_state_dict(torch.load(resume_path, map_location=device)['state_dict'])
       model.eval()
       return model
     
@@ -63,7 +64,7 @@ def remove_watermark(image_path, model = None, trans = None, trans_size_default_
             raise Exception("Error")
       with torch.no_grad():      
             image = Image.open(image_path).convert('RGB')
-            transformed_image = trans(image).cuda()
+            transformed_image = trans(image).to(device)
             imoutput,immask,_ = model(transformed_image)
             imrefine = imoutput[0]*immask + transformed_image*(1-immask)
             ims1 = im_to_numpy(torch.clamp(torch.cat([imrefine],dim=3)[0]*255,min=0.0,max=255.0)).astype(np.uint8)
@@ -74,7 +75,6 @@ def remove_watermark(image_path, model = None, trans = None, trans_size_default_
 if __name__ == '__main__':
       image_path = "example.jpg"
       result = remove_watermark(image_path)
-      cv2.imshow("Result", result)
+      cv2.imshow("result", result)
       cv2.waitKey(0)
       cv2.destroyAllWindows()
-
