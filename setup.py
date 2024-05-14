@@ -1,10 +1,13 @@
 from setuptools import setup, find_packages
+import subprocess
 
 def parse_requirements(file_path):
     with open(file_path, 'r') as f:
         return [line.strip() for line in f if line.strip()]
     
 requirements = parse_requirements('requirements.txt')
+
+subprocess.run(['git', 'clone', 'https://github.com/username/repository.git'])
 
 setup(
     name='ArtSnake',
