@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import subprocess
+import site, os
 
 def parse_requirements(file_path):
     with open(file_path, 'r') as f:
@@ -7,7 +8,13 @@ def parse_requirements(file_path):
     
 requirements = parse_requirements('requirements.txt')
 
-subprocess.run(['git', 'clone', 'https://github.com/vinthony/deep-blind-watermark-removal.git'])
+site_packages_dir = site.getsitepackages()[0]
+
+clone_path = os.path.join(site_packages_dir, 'ArtSnake', 'deep-blind-watermark-removal')
+
+os.makedirs(clone_path, exist_ok=True)
+
+subprocess.run(['git', 'clone', 'https://github.com/vinthony/deep-blind-watermark-removal.git', clone_path])
 
 setup(
     name='ArtSnake',
