@@ -4,9 +4,12 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 from torchvision import transforms
 import cv2
+import site
 
-sys.path.append('deep-blind-watermark-removal')
-sys.path.insert(0,'deep-blind-watermark-removal')
+site_packages_dir = site.getsitepackages()[0]
+clone_path = os.path.join(site_packages_dir, 'ArtSnake', 'deep-blind-watermark-removal')
+sys.path.append(clone_path)
+sys.path.insert(0, clone_path)
 
 from scripts.utils.imutils import im_to_numpy
 import scripts.models as models
