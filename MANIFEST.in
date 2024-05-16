@@ -1,1 +1,1 @@
-include watermark_model_v1.pt
+include ArtSnake/watermark_model_v1.pt
