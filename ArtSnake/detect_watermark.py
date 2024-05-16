@@ -27,7 +27,7 @@ def load_prebuilt_model():
         nn.ReLU(),
         nn.Linear(in_features=256, out_features=2),
     )
-    state_dict = torch.load('./watermark_model_v1.pt')
+    state_dict = torch.load('watermark_model_v1.pt')
     model.load_state_dict(state_dict)
     model.eval()
     return model
