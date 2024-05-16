@@ -46,10 +46,10 @@ def create_watermark_from_text(text, font_path, image_width, image_height):
         y += text_height
     return pil_img
 
-def insert_text_pass(img, watermark):
+def insert_watermark_pass(img, watermark):
     return img
 
-def insert_text_simple(img, watermark):
+def insert_watermark_simple(img, watermark):
     cv_img = np.array(watermark)
     cv_img = cv2.cvtColor(cv_img, cv2.COLOR_RGB2BGR)
     mask = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
@@ -63,9 +63,10 @@ if __name__ == '__main__':
     font = os.path.join('fonts', random.choice(os.listdir('fonts')))
     img = cv2.imread('example.jpg')
     watermark = create_watermark_from_text('Lorem ipsum', font, img.shape[1], img.shape[0])
-    img1 = insert_text_pass(img, watermark)
-    img2 = insert_text_simple(img, watermark)
-    cv2.imshow('insert_text_pass', img1)
-    cv2.imshow('insert_text_simple', img2)
+    img1 = insert_watermark_pass(img, watermark)
+    img2 = insert_watermark_simple(img, watermark)
+    cv2.imshow('watermark', np.array(watermark))
+    cv2.imshow('insert_watermark_pass', img1)
+    cv2.imshow('insert_watermark_simple', img2)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
