@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms as T
+from pkg_resources import resource_filename
 
 # Define preprocessing transformations
 preprocessing = T.Compose([
@@ -27,7 +28,8 @@ def load_prebuilt_model():
         nn.ReLU(),
         nn.Linear(in_features=256, out_features=2),
     )
-    state_dict = torch.load('watermark_model_v1.pt')
+    model_path = resource_filename(__name__, 'watermark_model_v1.pt')
+    state_dict = torch.load(model_path)
     model.load_state_dict(state_dict)
     model.eval()
     return model
