@@ -1,26 +1,12 @@
 from setuptools import setup, find_packages
 import subprocess
-import site, os, distutils.command.install
-
+import site, os
 
 def parse_requirements(file_path):
     with open(file_path, 'r') as f:
         return [line.strip() for line in f if line.strip()]
     
 requirements = parse_requirements('requirements.txt')
-
-class CustomInstall(distutils.command.install.install):
-    """Custom install command to clone additional repositories."""
-    def run(self):
-        super().run()
-        self.clone_additional_repositories()
-
-    def clone_additional_repositories(self):
-        site_packages_dir = site.getsitepackages()[0]
-        clone_path = os.path.join(site_packages_dir, 'ArtSnake', 'deep-blind-watermark-removal')
-
-        os.makedirs(clone_path, exist_ok=True)
-        subprocess.run(['git', 'clone', 'https://github.com/vinthony/deep-blind-watermark-removal.git', clone_path])
 
 setup(
     name='ArtSnake',
@@ -35,7 +21,12 @@ setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     include_package_data=True,
-    cmdclass={
-        'install': CustomInstall,
-    },
 )
+
+site_packages_dir = site.getsitepackages()[0]
+
+clone_path = os.path.join(site_packages_dir, 'ArtSnake', 'deep-blind-watermark-removal')
+
+os.makedirs(clone_path, exist_ok=True)
+
+subprocess.run(['git', 'clone', 'https://github.com/vinthony/deep-blind-watermark-removal.git', clone_path])
