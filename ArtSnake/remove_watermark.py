@@ -6,7 +6,7 @@ from torchvision import transforms
 import cv2
 import site
 
-site_packages_dir = site.getsitepackages()[0]
+site_packages_dir = site.getusersitepackages()
 clone_path = os.path.join(site_packages_dir, 'ArtSnake', 'deep-blind-watermark-removal')
 sys.path.append(clone_path)
 sys.path.insert(0, clone_path)
