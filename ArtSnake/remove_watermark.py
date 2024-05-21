@@ -26,7 +26,11 @@ def seed_everything(seed):
 
 seed_everything(18)
 
-resume_path = 'merged_file.tar'
+site_packages_dir = site.getusersitepackages()
+zip_path = os.path.join(site_packages_dir, 'ArtSnake')
+resume_name = '27kpng_model_best.pth.tar'
+resume_path = os.path.join(zip_path, resume_name)
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def load_model():
