@@ -1,5 +1,1 @@
-include ArtSnake/watermark_model_v1.pt
-include ArtSnake/split_part1.bin
-include ArtSnake/split_part2.bin
-include ArtSnake/split_part3.bin
-include ArtSnake/split_part4.bin
+include requirements.txt
