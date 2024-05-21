@@ -10,9 +10,6 @@ site_packages_dir = site.getusersitepackages()
 clone_path = os.path.join(site_packages_dir, 'ArtSnake', 'deep-blind-watermark-removal')
 zip_path = os.path.join(site_packages_dir, 'ArtSnake')
 
-if os.path.exists(zip_path):
-    shutil.rmtree(zip_path)
-
 os.makedirs(clone_path, exist_ok=True)
 subprocess.run(['git', 'clone', 'https://github.com/vinthony/deep-blind-watermark-removal.git', clone_path])
 unzip_and_copy('ArtSnake.zip', zip_path)
