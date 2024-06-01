@@ -8,13 +8,6 @@ import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms as T
 
-# Define preprocessing transformations
-preprocessing = T.Compose([
-    T.Resize((256, 256)),
-    T.ToTensor(),
-    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
-
 def load_prebuilt_model():
     """
     Load prebuilt watermark model
@@ -37,15 +30,28 @@ def load_prebuilt_model():
     model.eval()
     return model
 
-_PRE_BUILT_WATERMARK_DETECTION_MODEL = load_prebuilt_model()
+def load_prebuilt_transform():
+    """
+    Load prebuilt image transformation
+    """
+    return T.Compose([
+        T.Resize((256, 256)),
+        T.ToTensor(),
+        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
 
 
-def predict_image(image_path, model=_PRE_BUILT_WATERMARK_DETECTION_MODEL):
+def watermark_proba(image_path, model=None, preprocessing=None):
     """
     Returns the probability of an image being a watermarked.\n
-    The function assumes that the input image is preprocessed and formatted as a PyTorch tensor.\n
-    The function assumes that the model's forward pass returns a tensor containing raw logits or scores.
+    Use None for model and preprocessing to use the prebuilt model and preprocessing function.\n
+    The preprocessing function should take an image and return a PyTorch tensor.
     """
+    if model is None:
+        model = load_prebuilt_model()
+    if preprocessing is None:
+        preprocessing = load_prebuilt_transform()
+
     # Load the image and apply preprocessing
     img = preprocessing(Image.open(image_path).convert('RGB'))
     batch = torch.stack([img])
@@ -68,26 +74,18 @@ def predict_image(image_path, model=_PRE_BUILT_WATERMARK_DETECTION_MODEL):
     return water_sym
 
 
-def predict_images(model, directory):
+def watermark_proba_from_dir(directory, model=None, preprocessing=None):
     """
     Returns the probability of an image being a watermarked.
-    The function assumes that the input image is preprocessed and formatted as a PyTorch tensor.
-    The function assumes that the model's forward pass returns a tensor containing raw logits or scores.
+    Use None for model and preprocessing to use the prebuilt model and preprocessing function.\n
+    The preprocessing function should take an image and return a PyTorch tensor.
     """
     # Predict images in the specified directory
     for filename in os.listdir(directory):
         image_path = os.path.join(directory, filename)
         if os.path.isfile(image_path) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            predict_image(model, image_path)
+            watermark_proba(image_path, model, preprocessing)
 
 if __name__ == '__main__':
-    # Set up argument parser
-    parser = argparse.ArgumentParser(description='Detect watermark in images')
-    parser.add_argument('directory', metavar='directory_path', type=str, help='path to the directory containing images')
-    args = parser.parse_args()
-
-    # Load the model
-    model = load_prebuilt_model()
-
-    # Perform prediction on images in the specified directory
-    predict_images(model, args.directory)
+    image_path = "example.jpg"
+    watermark_proba(image_path)
