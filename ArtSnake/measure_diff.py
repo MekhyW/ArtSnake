@@ -49,6 +49,9 @@ def measure_similarity_ssim(img1, img2, show_similarity=False):
     return ssim_value
 
 
+def measure_diff_wrapper(func, img1, img2,):
+    return func(img1, img2)
+
 if __name__ == '__main__':
     img1 = cv2.imread('example.jpg')
     img2 = cv2.imread('example2.jpg')

@@ -1,5 +1,5 @@
 import os
-import argparse
+import cv2
 import timm
 import site
 import torch
@@ -41,7 +41,36 @@ def load_prebuilt_transform():
     ])
 
 
-def watermark_proba(image_path, model=None, preprocessing=None):
+def watermark_proba_from_opencv(img, model=None, preprocessing=None):
+    """
+    Returns the probability of an image being a watermarked.\n
+    Use None for model and preprocessing to use the prebuilt model and preprocessing function.\n
+    The preprocessing function should take an image and return a PyTorch tensor.
+    """
+    if model is None:
+        model = load_prebuilt_model()
+    if preprocessing is None:
+        preprocessing = load_prebuilt_transform()
+
+    # Load the image and apply preprocessing
+    img = preprocessing(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)))
+    batch = torch.stack([img])
+
+    # Use GPU if available
+    if torch.cuda.is_available():
+        model.cuda()
+        batch = batch.cuda()
+
+    # Perform prediction
+    with torch.no_grad():
+        pred = model(batch)
+        syms = F.softmax(pred, dim=1).detach().cpu().numpy().tolist()
+        for sym in syms:
+            water_sym, clear_sym = sym
+    return water_sym
+
+
+def watermark_proba_from_path(image_path, model=None, preprocessing=None):
     """
     Returns the probability of an image being a watermarked.\n
     Use None for model and preprocessing to use the prebuilt model and preprocessing function.\n
@@ -84,8 +113,8 @@ def watermark_proba_from_dir(directory, model=None, preprocessing=None):
     for filename in os.listdir(directory):
         image_path = os.path.join(directory, filename)
         if os.path.isfile(image_path) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            watermark_proba(image_path, model, preprocessing)
+            watermark_proba_from_path(image_path, model, preprocessing)
 
 if __name__ == '__main__':
     image_path = "example.jpg"
-    watermark_proba(image_path)
+    watermark_proba_from_path(image_path)

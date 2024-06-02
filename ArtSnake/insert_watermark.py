@@ -3,6 +3,9 @@ from PIL import ImageFont, ImageDraw, Image
 import numpy as np
 import random
 import os
+from .remove_watermarks import remove_watermark
+from .measure_diff import *
+from .detect_watermark import watermark_proba_from_opencv
 
 def fit_text_in_box(font, bounding_box, text):
     x, y, w, h = bounding_box
@@ -84,6 +87,21 @@ def insert_watermark_simple_adaptive(img, watermark):
     final_image = alpha[..., None] * img + beta[..., None] * watermark_padded
     final_image = final_image.clip(0, 255).astype(np.uint8)
     return cv2.cvtColor(final_image, cv2.COLOR_RGB2BGR)
+
+
+def insert_watermark(img, watermark, measure_similarity=measure_similarity_ssim):
+    steps = [insert_watermark_pass, insert_watermark_simple, insert_watermark_simple_adaptive]
+    best_img = None
+    best_score = 0
+
+    for step in steps:
+        img1 = step(img, watermark)
+        img2 = remove_watermark(img1)
+        score = measure_diff_wrapper(measure_similarity, img1, img2)/watermark_proba_from_opencv(img1)
+        if score > best_score:
+            best_score = score
+            best_img = img1
+    return best_img, best_score
 
 if __name__ == '__main__':
     font = os.path.join('fonts', random.choice(os.listdir('fonts')))
