@@ -58,11 +58,11 @@ def remove_watermark_from_dir(image_dir, model = None, trans = None, trans_size_
                   if not image_name.endswith(('.jpg', '.jpeg', '.png', '.bmp')):
                         raise Exception("Error")
                   image_path = os.path.join(image_dir, image_name)
-                  ims1 = remove_watermark(image_path, model, trans)
+                  ims1 = remove_watermark_from_path(image_path, model, trans)
                   results.append(ims1)
             return results
 
-def remove_watermark(image_path, model = None, trans = None, trans_size_default_model = (256, 256)):
+def remove_watermark_from_path(image_path, model = None, trans = None, trans_size_default_model = (256, 256)):
       if model is None:
             model = load_model()
       if trans is None:
@@ -77,11 +77,26 @@ def remove_watermark(image_path, model = None, trans = None, trans_size_default_
             ims1 = im_to_numpy(torch.clamp(torch.cat([imrefine],dim=3)[0]*255,min=0.0,max=255.0)).astype(np.uint8)
             ims1 = cv2.cvtColor(ims1, cv2.COLOR_RGB2BGR)
             return ims1
+      
+
+def remove_watermark_from_opencv(img, model = None, trans = None, trans_size_default_model = (256, 256)):
+      if model is None:
+            model = load_model()
+      if trans is None:
+            trans = load_transform(trans_size_default_model)
+      with torch.no_grad():      
+            image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            transformed_image = trans(image).to(device)
+            imoutput,immask,_ = model(transformed_image)
+            imrefine = imoutput[0]*immask + transformed_image*(1-immask)
+            ims1 = im_to_numpy(torch.clamp(torch.cat([imrefine],dim=3)[0]*255,min=0.0,max=255.0)).astype(np.uint8)
+            ims1 = cv2.cvtColor(ims1, cv2.COLOR_RGB2BGR)
+            return ims1
 
 
 if __name__ == '__main__':
       image_path = "example.jpg"
-      result = remove_watermark(image_path)
+      result = remove_watermark_from_path(image_path)
       cv2.imshow("result", result)
       cv2.waitKey(0)
       cv2.destroyAllWindows()

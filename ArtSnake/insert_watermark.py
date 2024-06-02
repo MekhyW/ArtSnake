@@ -3,7 +3,7 @@ from PIL import ImageFont, ImageDraw, Image
 import numpy as np
 import random
 import os
-from .remove_watermarks import remove_watermark
+from .remove_watermarks import remove_watermark_from_opencv
 from .measure_diff import *
 from .detect_watermark import watermark_proba_from_opencv
 
@@ -96,7 +96,7 @@ def insert_watermark(img, watermark, measure_similarity=measure_similarity_ssim)
 
     for step in steps:
         img1 = step(img, watermark)
-        img2 = remove_watermark(img1)
+        img2 = remove_watermark_from_opencv(img1, trans_size_default_model=(256, 256))
         score = measure_diff_wrapper(measure_similarity, img1, img2)/watermark_proba_from_opencv(img1)
         if score > best_score:
             best_score = score
