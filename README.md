@@ -1,4 +1,5 @@
 [![Documentation Status](https://readthedocs.org/projects/artsnake/badge/?version=latest)](https://artsnake.readthedocs.io/en/latest/?badge=latest)
+![PyPI](https://img.shields.io/pypi/v/ArtSnake.svg)
 
 # ArtSnake
 
