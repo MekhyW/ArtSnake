@@ -41,6 +41,13 @@ def load_prebuilt_transform():
     ])
 
 
+def detect_watermark_wrapper(func, img):
+    """
+    Wrapper function for detecting watermarks
+    """
+    return func(img)
+
+
 def watermark_proba_from_opencv(img, model=None, preprocessing=None):
     """
     Returns the probability of an image being a watermarked.\n

@@ -46,6 +46,9 @@ def load_transform(size):
             lambda x: x.unsqueeze(0)
             ])
       return trans
+
+def remove_watermark_wrapper(func, img):
+      return func(img)
       
 def remove_watermark_from_dir(image_dir, model = None, trans = None, trans_size_default_model = (256, 256)):
       if model is None:

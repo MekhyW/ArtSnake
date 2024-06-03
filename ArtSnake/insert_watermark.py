@@ -3,9 +3,9 @@ from PIL import ImageFont, ImageDraw, Image
 import numpy as np
 import random
 import os
-from .remove_watermarks import remove_watermark_from_opencv
+from .remove_watermarks import *
 from .measure_diff import *
-from .detect_watermark import watermark_proba_from_opencv
+from .detect_watermark import *
 
 def fit_text_in_box(font, bounding_box, text):
     x, y, w, h = bounding_box
@@ -89,15 +89,15 @@ def insert_watermark_simple_adaptive(img, watermark):
     return cv2.cvtColor(final_image, cv2.COLOR_RGB2BGR)
 
 
-def insert_watermark(img, watermark, measure_similarity=measure_similarity_ssim):
+def insert_watermark(img, watermark, measure_similarity=measure_similarity_ssim, watermark_detector= watermark_proba_from_opencv, watermark_remover=remove_watermark_from_opencv):
     steps = [insert_watermark_pass, insert_watermark_simple, insert_watermark_simple_adaptive]
     best_img = None
     best_score = 0
 
     for step in steps:
         img1 = step(img, watermark)
-        img2 = remove_watermark_from_opencv(img1, trans_size_default_model=(256, 256))
-        score = measure_diff_wrapper(measure_similarity, img1, img2)/watermark_proba_from_opencv(img1)
+        img2 = remove_watermark_wrapper(watermark_remover, img1)
+        score = measure_diff_wrapper(measure_similarity, img1, img2)/detect_watermark_wrapper(watermark_detector, img1)
         if score > best_score:
             best_score = score
             best_img = img1
