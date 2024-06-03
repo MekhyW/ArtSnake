@@ -61,6 +61,23 @@ def insert_watermark_simple(img, watermark):
     img = cv2.add(img, watermark)
     return img
 
+def rotate_watermark(watermark):
+    angle = random.uniform(-45, 45)  # Rotate between -45 to 45 degrees
+    h, w = watermark.shape[:2]
+    center = (w // 2, h // 2)
+    matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+    rotated_watermark = cv2.warpAffine(watermark, matrix, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0,0,0))
+    return rotated_watermark
+
+def change_watermark_position(watermark, img_shape):
+    h_img, w_img = img_shape[:2]
+    h_wm, w_wm = watermark.shape[:2]
+    x = random.randint(0, w_img - w_wm)
+    y = random.randint(0, h_img - h_wm)
+    positioned_watermark = np.full((h_img, w_img, 3), (0, 0, 0), dtype=np.uint8)
+    positioned_watermark[y:y+h_wm, x:x+w_wm] = watermark
+    return positioned_watermark
+
 def insert_watermark_simple_adaptive(img, watermark):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     watermark = cv2.cvtColor(watermark, cv2.COLOR_BGR2RGB)
@@ -88,15 +105,24 @@ def insert_watermark_simple_adaptive(img, watermark):
     final_image = final_image.clip(0, 255).astype(np.uint8)
     return cv2.cvtColor(final_image, cv2.COLOR_RGB2BGR)
 
+def insert_watermark_with_rotation_and_position(img, watermark):
+    rotated_watermark = rotate_watermark(watermark)
+    positioned_watermark = change_watermark_position(rotated_watermark, img.shape)
+    return insert_watermark_simple_adaptive(img, positioned_watermark)
 
-def insert_watermark(img, watermark, measure_similarity=measure_similarity_ssim, watermark_detector= watermark_proba_from_opencv, watermark_remover=remove_watermark_from_opencv):
-    steps = [insert_watermark_pass, insert_watermark_simple, insert_watermark_simple_adaptive]
+
+def insert_watermark(img, watermark, measure_similarity=measure_similarity_ssim, watermark_detector= watermark_proba_prebuilt_from_opencv, watermark_remover=remove_watermark_prebuilt_from_opencv):
+    #steps = [insert_watermark_pass, insert_watermark_simple, insert_watermark_simple_adaptive]
+    steps = []
+    for i in range(10):
+        steps.append(insert_watermark_with_rotation_and_position)
     best_img = None
     best_score = 0
 
     for step in steps:
         img1 = step(img, watermark)
         img2 = remove_watermark_wrapper(watermark_remover, img1)
+        img2 = cv2.resize(img2, (img.shape[1], img.shape[0]))
         score = measure_diff_wrapper(measure_similarity, img1, img2)/detect_watermark_wrapper(watermark_detector, img1)
         if score > best_score:
             best_score = score
