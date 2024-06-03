@@ -1,4 +1,5 @@
 [![Documentation Status](https://readthedocs.org/projects/artsnake/badge/?version=latest)](https://artsnake.readthedocs.io/en/latest/?badge=latest)
+![PyPI](https://img.shields.io/pypi/v/ArtSnake.svg)
 
 # ArtSnake
 
@@ -23,7 +24,7 @@ To install ArtSnake, open your terminal and run the following command:
 
 Download the post_install.py and ArtSnake.zip files from the repository https://drive.google.com/drive/folders/1BQiAme8a6fbI0lzCc6Jg3Qfr5LxSJiH3?usp=drive_link.
 
-Ensure that both files (post_install.py and ArtSnake.zip) are in the same directory.
+Ensure that both files (post_install.py and ArtSnake.zip) are in the same directory and DO NOT unzip the ArtSnake.zip.
 
 Open your terminal, navigate to the directory containing these files, and run the following command:
 
@@ -38,6 +39,10 @@ If you encounter any issues, please refer to the documentation.
 Happy coding with ArtSnake!
 
 ## References
+
+### Link to Pypi page
+
+https://pypi.org/project/ArtSnake/
 
 ### Papers
 
