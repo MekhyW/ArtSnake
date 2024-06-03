@@ -1,3 +1,6 @@
+[![Documentation Status](https://readthedocs.org/projects/artsnake/badge/?version=latest)](https://artsnake.readthedocs.io/en/latest/?badge=latest)
+![PyPI](https://img.shields.io/pypi/v/ArtSnake.svg)
+
 # ArtSnake
 
 **Say no to art theft!** Robust and easy-to-use tool/API to protect digital art and photos from use without consent, combining context-aware watermarking and image poisoning.
