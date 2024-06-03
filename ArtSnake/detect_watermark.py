@@ -41,23 +41,22 @@ def load_prebuilt_transform():
     ])
 
 
-def detect_watermark_wrapper(func, img, **kwargs):
+def detect_watermark_wrapper(func, img):
     """
     Wrapper function for detecting watermarks
     """
-    return func(img, **kwargs)
+    return func(img)
 
 
-def watermark_proba_from_opencv(img, model=None, preprocessing=None):
+def watermark_proba_prebuilt_from_opencv(img):
     """
     Returns the probability of an image being a watermarked.\n
     Use None for model and preprocessing to use the prebuilt model and preprocessing function.\n
     The preprocessing function should take an image and return a PyTorch tensor.
     """
-    if model is None:
-        model = load_prebuilt_model()
-    if preprocessing is None:
-        preprocessing = load_prebuilt_transform()
+    
+    model = load_prebuilt_model()
+    preprocessing = load_prebuilt_transform()
 
     # Load the image and apply preprocessing
     img = preprocessing(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)))

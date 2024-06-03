@@ -47,8 +47,8 @@ def load_transform(size):
             ])
       return trans
 
-def remove_watermark_wrapper(func, img, **kwargs):
-      return func(img, **kwargs)
+def remove_watermark_wrapper(func, img):
+      return func(img)
       
 def remove_watermark_from_dir(image_dir, model = None, trans = None, trans_size_default_model = (256, 256)):
       if model is None:
@@ -82,11 +82,10 @@ def remove_watermark_from_path(image_path, model = None, trans = None, trans_siz
             return ims1
       
 
-def remove_watermark_from_opencv(img, model = None, trans = None, trans_size_default_model = (256, 256)):
-      if model is None:
-            model = load_model()
-      if trans is None:
-            trans = load_transform(trans_size_default_model)
+def remove_watermark_prebuilt_from_opencv(img):
+      trans_size_default_model = (256, 256)
+      model = load_model()
+      trans = load_transform(trans_size_default_model)
       with torch.no_grad():      
             image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             transformed_image = trans(image).to(device)
