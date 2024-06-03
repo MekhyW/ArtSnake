@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-from scipy.sparse.csgraph import dijkstra
-from scipy.spatial.distance import euclidean
 
 # Main function to perform the entire watermark embedding process
 def watermark_embedding(image, watermark, debug=False):
@@ -33,20 +31,23 @@ def salient_region_detection(image, debug=False):
     saliency_scores = []
     for Ri in superpixels:
         sigma = estimate_sigma(image)
-        Ni = calculate_scaling_factor(Ri, superpixels, sigma)
-        wi = 1 if Ri in polygon_S else 0
+        Ni, wi = calculate_scaling_factor(Ri, superpixels, sigma)
         di = sum_of_squared_distances(Ri, superpixels)
         fi = wi * di
         Si = fi * Ni**(-1)
+        if debug:
+            print('Ni:', Ni, 'wi:', wi, 'di:', di, 'fi:', fi, 'Si:', Si)
         saliency_scores.append(Si)
     normalized_scores = normalize_saliency_scores(saliency_scores)
-    saliency_map = create_saliency_map(normalized_scores)
+    saliency_map = create_saliency_map(image, superpixels, normalized_scores)
     return saliency_map
 
 # Function to adaptively select the embedding region
 def adaptive_selection_of_embedding_region(image, salient_map, watermark_size, debug=False):
     nonsalient_regions = get_nonsalient_regions(image, salient_map)
     subblocks = segment_into_subblocks(nonsalient_regions, watermark_size)
+    if debug:
+        print('Number of subblocks:', len(subblocks))
     texture_complexities = []
     gray_value_features = []
     for block in subblocks:
@@ -124,7 +125,11 @@ def laplacian_transform(image):
     return cv2.Laplacian(image, cv2.CV_64F)
 
 def otsu_binarization(image):
-    _, binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    image_float = image.astype(np.float64)
+    image_float = np.clip(image_float, 0, 255)
+    image_uint8 = np.uint8(image_float)
+    gray = cv2.cvtColor(image_uint8, cv2.COLOR_BGR2GRAY)
+    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return binary
 
 def morphological_closing(image):
@@ -142,10 +147,10 @@ def normalize_saliency_scores(scores):
     max_score = max(scores)
     return [(score - min_score) / (max_score - min_score) * 255 for score in scores]
 
-def create_saliency_map(scores):
-    saliency_map = np.zeros((len(scores), len(scores[0])), dtype=np.uint8)
-    for i, score in enumerate(scores):
-        saliency_map[i // saliency_map.shape[1], i % saliency_map.shape[1]] = score
+def create_saliency_map(image, superpixels, normalized_scores):
+    saliency_map = np.zeros_like(image)
+    for i, Ri in enumerate(superpixels):
+        saliency_map[Ri] = normalized_scores[i]
     return saliency_map
 
 def calculate_jnd_matrix(Y):
@@ -179,7 +184,7 @@ def normalize_gamma(gamma_i):
 def k_means_clustering(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     data = np.float32(gray.reshape(-1, 1))
-    num_clusters = 100
+    num_clusters = 20
     ret, labels, centers = cv2.kmeans(data, num_clusters, None, criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0), attempts=10, flags=cv2.KMEANS_RANDOM_CENTERS)
     labels = labels.reshape(gray.shape)
     masks = []
@@ -207,10 +212,10 @@ def construct_minimum_polygon(corner_points):
 def calculate_scaling_factor(Ri, superpixels, sigma=1.0):
     Ni = 0
     for Rj in superpixels:
-        if not np.array_equal(Ri, Rj):
-            LMij = calculate_shortest_path(Ri, Rj)
-            Ni += np.exp(-LMij / (sigma**2))
-    return Ni
+        wi = 1 if np.isin(Ri, Rj).any() else 0
+        LMij = calculate_shortest_path(Ri, Rj)
+        Ni += np.exp(-LMij / (sigma**2)) * wi
+    return Ni, wi
 
 def calculate_polygon_area(polygon):
     polygon_points = np.array(polygon, dtype=np.float32)
@@ -223,15 +228,7 @@ def sum_of_squared_distances(Ri, superpixels):
     return di
 
 def calculate_shortest_path(Ri, Rj):
-    Ri = np.array(Ri)
-    Rj = np.array(Rj)
-    distance_matrix = np.sqrt(np.sum((Ri[:, None, :] - Rj[None, :, :])**2, axis=-1))
-    distance_matrix = distance_matrix / np.max(distance_matrix)
-    distance_matrix = 1 - distance_matrix
-    distance_matrix = distance_matrix * 100
-    distance_matrix = distance_matrix.astype(np.int32)
-    graph = dijkstra(csgraph=distance_matrix, directed=False, indices=Ri, return_predecessors=False)
-    return graph[Rj]
+    return np.linalg.norm(np.array(Ri) - np.array(Rj))
 
 def distance_between_masks(mask1, mask2):
     difference = mask1 - mask2
