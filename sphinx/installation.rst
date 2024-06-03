@@ -18,7 +18,7 @@ Step 2: Download and Execute Post-Installation Script
 
 Download the post_install.py and ArtSnake.zip files from the repository https://drive.google.com/drive/folders/1BQiAme8a6fbI0lzCc6Jg3Qfr5LxSJiH3?usp=drive_link.
 
-Ensure that both files (post_install.py and ArtSnake.zip) are in the same directory.
+Ensure that both files (post_install.py and ArtSnake.zip) are in the same directory and DO NOT unzip the ArtSnake.zip.
 
 Open your terminal, navigate to the directory containing these files, and run the following command:
 

@@ -36,14 +36,26 @@ The `insert_watermark` function inserts a watermark into an image. This is the m
 **Returns:**
 
 - `img` (numpy.ndarray): The image with the watermark inserted.
+- `score` (float): The score of the quality of the inserted watermark. 
 
 **Example Usage:**
 
 .. code-block:: python
 
-    from ArtSnake import insert_watermark
+    import cv2 
+    from ArtSnake import *
 
-    img = insert_watermark(image, watermark)
+    imagem1_path = "../image.jpeg"
+    imagem2_path = "../praia.jpg"
+
+    img1 = cv2.imread(imagem1_path)
+    img2 = cv2.imread(imagem2_path)
+
+    result, score = insert_watermark(img2, img1, 10)
+    cv2.imshow("result", result)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 
 
 Image Comparison Functions
