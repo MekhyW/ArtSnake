@@ -41,11 +41,11 @@ def load_prebuilt_transform():
     ])
 
 
-def detect_watermark_wrapper(func, img):
+def detect_watermark_wrapper(func, img, **kwargs):
     """
     Wrapper function for detecting watermarks
     """
-    return func(img)
+    return func(img, **kwargs)
 
 
 def watermark_proba_from_opencv(img, model=None, preprocessing=None):
