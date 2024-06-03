@@ -4,32 +4,47 @@ from scipy.sparse.csgraph import dijkstra
 from scipy.spatial.distance import euclidean
 
 # Main function to perform the entire watermark embedding process
-def watermark_embedding(image, watermark):
-    salient_map = salient_region_detection(image)
-    embedding_region = adaptive_selection_of_embedding_region(image, salient_map, watermark.shape)
-    final_image = adaptive_visible_watermark_embedding(image, watermark, embedding_region)
+def watermark_embedding(image, watermark, debug=False):
+    if debug:
+        print('Original image shape:', image.shape)
+        print('Watermark shape:', watermark.shape)
+    salient_map = salient_region_detection(image, debug=debug)
+    if debug:
+        print('Saliency map shape:', salient_map.shape)
+    embedding_region = adaptive_selection_of_embedding_region(image, salient_map, watermark.shape, debug=debug)
+    if debug:
+        print('Embedding region shape:', embedding_region.shape)
+    final_image = adaptive_visible_watermark_embedding(image, watermark, embedding_region, debug=debug)
+    if debug:
+        print('Final image shape:', final_image.shape)
     return final_image
 
 # Function to detect salient regions
-def salient_region_detection(image):
+def salient_region_detection(image, debug=False):
     superpixels = k_means_clustering(image)
+    if debug:
+        print('Number of superpixels:', len(superpixels))
     corner_points = extract_corner_points(image)
+    if debug:
+        print('Number of corner points:', len(corner_points))
     polygon_S = construct_minimum_polygon(corner_points)
+    if debug:
+        print('Number of polygon S points:', len(polygon_S))
     saliency_scores = []
     for Ri in superpixels:
-        Ni = calculate_scaling_factor(polygon_S, image.shape[1], image.shape[0])
+        sigma = estimate_sigma(image)
+        Ni = calculate_scaling_factor(Ri, superpixels, sigma)
         wi = 1 if Ri in polygon_S else 0
-        di = sum_of_squared_distances(image, Ri)
+        di = sum_of_squared_distances(Ri, superpixels)
         fi = wi * di
-        sigma = estimate_sigma(superpixels)
-        Si = fi * sum(np.exp(-LMij / sigma**2) for LMij in shortest_paths(Ri, superpixels))**(-1)
+        Si = fi * Ni**(-1)
         saliency_scores.append(Si)
     normalized_scores = normalize_saliency_scores(saliency_scores)
     saliency_map = create_saliency_map(normalized_scores)
     return saliency_map
 
 # Function to adaptively select the embedding region
-def adaptive_selection_of_embedding_region(image, salient_map, watermark_size):
+def adaptive_selection_of_embedding_region(image, salient_map, watermark_size, debug=False):
     nonsalient_regions = get_nonsalient_regions(image, salient_map)
     subblocks = segment_into_subblocks(nonsalient_regions, watermark_size)
     texture_complexities = []
@@ -52,7 +67,7 @@ def adaptive_selection_of_embedding_region(image, salient_map, watermark_size):
     return embedding_region
 
 # Function to embed the watermark adaptively
-def adaptive_visible_watermark_embedding(image, watermark, embedding_region):
+def adaptive_visible_watermark_embedding(image, watermark, embedding_region, debug=False):
     yuv_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
     Y, U, V = cv2.split(yuv_image)
     J = calculate_jnd_matrix(Y)
@@ -189,46 +204,34 @@ def construct_minimum_polygon(corner_points):
     min_polygon = cv2.convexHull(polygon)
     return min_polygon
 
-def calculate_scaling_factor(polygon, image_width, image_height):
-    polygon_area = calculate_polygon_area(polygon)
-    bounding_rect = cv2.boundingRect(np.array(polygon))
-    rect_width = bounding_rect[2]
-    rect_height = bounding_rect[3]
-    bounding_rect_area = rect_width * rect_height
-    scaling_factor = min(image_width / rect_width, image_height / rect_height)
-    scaled_rect_area = scaling_factor * scaling_factor * bounding_rect_area
-    area_difference = abs(polygon_area - scaled_rect_area)
-    return scaling_factor, area_difference
+def calculate_scaling_factor(Ri, superpixels, sigma=1.0):
+    Ni = 0
+    for Rj in superpixels:
+        if not np.array_equal(Ri, Rj):
+            LMij = calculate_shortest_path(Ri, Rj)
+            Ni += np.exp(-LMij / (sigma**2))
+    return Ni
 
 def calculate_polygon_area(polygon):
     polygon_points = np.array(polygon, dtype=np.float32)
     return cv2.contourArea(polygon_points)
 
-def sum_of_squared_distances(image, polygon):
-    height, width = image.shape[:2]
-    total_distance = 0
-    for y in range(height):
-        for x in range(width):
-            distance = calculate_distance(polygon, x, y)
-            total_distance += distance ** 2
-    return total_distance
+def sum_of_squared_distances(Ri, superpixels):
+    di = 0
+    for Rj in superpixels:
+        di += np.sum((np.array(Ri) - np.array(Rj))**2)
+    return di
 
-def calculate_distance(polygon, x, y):
-    pixel_point = np.array([x, y])
-    polygon_points = np.array(polygon)
-    print(pixel_point, polygon_points)
-    distances = [euclidean(pixel_point, point) for point in polygon_points]
-    return min(distances)
-
-def shortest_paths(Ri, superpixels):
-    num_superpixels = len(superpixels)
-    graph = np.zeros((num_superpixels, num_superpixels))
-    for i in range(num_superpixels):
-        for j in range(i+1, num_superpixels):
-            if Ri[superpixels[i], superpixels[j]] == 1:
-                graph[i, j] = graph[j, i] = 1
-    distances = dijkstra(csgraph=graph, indices=None, indptr=None, indices_dtype=None, return_predecessors=False)
-    return distances
+def calculate_shortest_path(Ri, Rj):
+    Ri = np.array(Ri)
+    Rj = np.array(Rj)
+    distance_matrix = np.sqrt(np.sum((Ri[:, None, :] - Rj[None, :, :])**2, axis=-1))
+    distance_matrix = distance_matrix / np.max(distance_matrix)
+    distance_matrix = 1 - distance_matrix
+    distance_matrix = distance_matrix * 100
+    distance_matrix = distance_matrix.astype(np.int32)
+    graph = dijkstra(csgraph=distance_matrix, directed=False, indices=Ri, return_predecessors=False)
+    return graph[Rj]
 
 def distance_between_masks(mask1, mask2):
     difference = mask1 - mask2
@@ -237,15 +240,11 @@ def distance_between_masks(mask1, mask2):
     average_distance = sum_of_absolute_difference / (mask1.size * mask1.itemsize)
     return average_distance
 
-def estimate_sigma(masks, shortest_paths, Ri, sigma_values):
-    num_masks = len(masks)
-    estimated_sigma = [np.zeros_like(sigma_values[0]) for _ in range(num_masks)]
-    for i in range(num_masks):
-        for j in range(i+1, num_masks):
-            average_path_length = np.mean(shortest_paths[i, j])
-            average_distance = np.mean(distance_between_masks(masks[i], masks[j]))
-            estimated_sigma[i] += (average_path_length - average_distance) / (sigma_values[i] * (1 - sigma_values[i]))
-    return estimated_sigma
+def estimate_sigma(image, fraction=0.1):
+    height, width = image.shape[:2]
+    diagonal_length = np.sqrt(height**2 + width**2)
+    sigma = fraction * diagonal_length
+    return sigma
 
 def estimate_omega(Y):
     hist, _ = np.histogram(Y, bins=256, range=(0, 255))
@@ -256,7 +255,7 @@ def estimate_omega(Y):
 if __name__ == '__main__':
     image = cv2.imread('ArtSnake/example.jpg')
     watermark = cv2.imread('ArtSnake/watermark.png')
-    final_image = watermark_embedding(image, watermark)
+    final_image = watermark_embedding(image, watermark, debug=True)
     cv2.imshow('Watermarked Image', final_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
