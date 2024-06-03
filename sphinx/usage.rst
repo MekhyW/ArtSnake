@@ -8,40 +8,47 @@ This document provides an overview and description of the functions available in
     :local:
     :depth: 2
 
-Image Comparison Functions
-============================
+Watermark Insertion Functions
+=====================================
 
-The following functions are designed to compare images by calculating differences and similarities.
-
-make_same_shape
-----------------
+insert_watermark
+-----------------
 
 **Description:**
 
-The `make_same_shape` function resizes two images to have the same shape.
+The `insert_watermark` function inserts a watermark into an image. This is the main function and uses multiple sub-functions to detect, remove, and insert watermarks. You can create your custom functions and pass them as arguments to this function, but the standard versions of each function are listed below.
 
 **Function Signature:**
 
 .. code-block:: python
 
-    make_same_shape(img1, img2)
+    insert_watermark(img, watermark, measure_diff=measure_diff_padrao, watermark_remover=watermark_remover_padrao, watermark_detector=watermark_detector_padrao)
 
 **Arguments:**
 
-- `img1` (numpy.ndarray): The first image.
-- `img2` (numpy.ndarray): The second image.
+- `img` (numpy.ndarray): The image to insert the watermark into.
+- `watermark` (numpy.ndarray): The watermark image.
+- `measure_diff` (function, optional): The function to use for measuring differences between images. Defaults to `measure_diff_padrao`.
+- `watermark_remover` (function, optional): The function to use for removing watermarks from images. Defaults to `watermark_remover_padrao`.
+- `watermark_detector` (function, optional): The function to use for detecting watermarks in images. Defaults to `watermark_detector_padrao`.
 
 **Returns:**
 
-- `img1`, `img2` (tuple of numpy.ndarray): The resized images with the same shape.
+- `img` (numpy.ndarray): The image with the watermark inserted.
 
 **Example Usage:**
 
 .. code-block:: python
 
-    from ArtSnake import make_same_shape
+    from ArtSnake import insert_watermark
 
-    img1, img2 = make_same_shape(image1, image2)
+    img = insert_watermark(image, watermark)
+
+
+Image Comparison Functions
+============================
+
+The following functions are designed to compare images by calculating differences and similarities.
 
 measure_diff_simple
 --------------------
@@ -168,44 +175,6 @@ The `watermark_proba_prebuilt_from_opencv` function calculates the probability t
     from ArtSnake import watermark_proba_prebuilt_from_opencv
 
     proba = watermark_proba_prebuilt_from_opencv('path/to/image.jpg')
-
-
-
-Watermark Insertion Functions
-=====================================
-
-insert_watermark
------------------
-
-**Description:**
-
-The `insert_watermark` function inserts a watermark into an image.
-
-**Function Signature:**
-
-.. code-block:: python
-
-    insert_watermark(img, watermark, measure_diff=measure_diff_padrao, watermark_remover=watermark_remover_padrao, watermark_detector=watermark_detector_padrao)
-
-**Arguments:**
-
-- `img` (numpy.ndarray): The image to insert the watermark into.
-- `watermark` (numpy.ndarray): The watermark image.
-- `measure_diff` (function, optional): The function to use for measuring differences between images. Defaults to `measure_diff_padrao`.
-- `watermark_remover` (function, optional): The function to use for removing watermarks from images. Defaults to `watermark_remover_padrao`.
-- `watermark_detector` (function, optional): The function to use for detecting watermarks in images. Defaults to `watermark_detector_padrao`.
-
-**Returns:**
-
-- `img` (numpy.ndarray): The image with the watermark inserted.
-
-**Example Usage:**
-
-.. code-block:: python
-
-    from ArtSnake import insert_watermark
-
-    img = insert_watermark(image, watermark)
 
 
 Watermark Removal Functions

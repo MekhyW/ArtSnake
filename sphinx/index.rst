@@ -1,6 +1,6 @@
 .. Sphinx Documentation Project index file, created by ChatGPT
 
-Welcome to My Project's Documentation!
+Welcome to ArtSnake!
 ======================================
 
 
