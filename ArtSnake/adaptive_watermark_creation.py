@@ -20,14 +20,8 @@ def watermark_embedding(image, watermark, debug=False):
 # Function to detect salient regions
 def salient_region_detection(image, debug=False):
     superpixels = k_means_clustering(image)
-    if debug:
-        print('Number of superpixels:', len(superpixels))
     corner_points = extract_corner_points(image)
-    if debug:
-        print('Number of corner points:', len(corner_points))
     polygon_S = construct_minimum_polygon(corner_points)
-    if debug:
-        print('Number of polygon S points:', len(polygon_S))
     saliency_scores = []
     for Ri in superpixels:
         sigma = estimate_sigma(image)
@@ -74,31 +68,29 @@ def adaptive_visible_watermark_embedding(image, watermark, embedding_region, deb
     J = calculate_jnd_matrix(Y)
     omega = estimate_omega(Y)
     I_w = Y.copy()
-    for i in range(watermark.shape[0]):
-        for j in range(watermark.shape[1]):
-            W_ij = watermark[i, j]
+    watermark_resized = cv2.resize(watermark, (embedding_region.shape[1] // 2, embedding_region.shape[0] // 2))
+    for i in range(watermark_resized.shape[0]):
+        for j in range(watermark_resized.shape[1]):
+            W_ij = watermark_resized[i, j] / 255.0
             B_i = embedding_region[i*2:(i+1)*2, j*2:(j+1)*2]
-            if W_ij == 0:
-                continue
-            elif W_ij == 1:
-                P1, P2, P3, P4 = B_i.flatten()
-                a_i = (P1 + P2) / 2
-                a_j = (P3 + P4) / 2
-                beta_i = np.arctan(a_j / a_i) + (np.pi / 4)
-                alpha_i = calculate_texture_complexity(B_i)
-                gamma_i = alpha_i / (beta_i - 1)
-                gamma_i = normalize_gamma(gamma_i)
-                for x in range(B_i.shape[0]):
-                    for y in range(B_i.shape[1]):
-                        I_ij = Y[i*2 + x, j*2 + y]
-                        D_i = abs(W_ij - I_ij)
-                        if D_i < J[x, y]:
-                            if I_ij < 127:
-                                I_w[i*2 + x, j*2 + y] = I_ij + omega * J[x, y]
-                            else:
-                                I_w[i*2 + x, j*2 + y] = I_ij - omega * J[x, y]
+            P1, P2, P3, P4 = B_i[0, 0], B_i[0, 1], B_i[1, 1], B_i[1, 0]
+            a_i = (P1 + P2) / 2
+            a_j = (P3 + P4) / 2
+            beta_i = np.arctan(a_j / a_i) + (np.pi / 4)
+            alpha_i = calculate_texture_complexity(B_i)
+            gamma_i = alpha_i / (beta_i - 1)
+            gamma_i = normalize_gamma(gamma_i)
+            for x in range(B_i.shape[0]):
+                for y in range(B_i.shape[1]):
+                    I_ij = Y[i*2 + x, j*2 + y]
+                    D_i = abs(W_ij - I_ij / 255.0)
+                    if np.average(D_i) < J[x, y]:
+                        if I_ij < 127:
+                            I_w[i*2 + x, j*2 + y] = int(I_ij + omega * J[x, y] * np.average(W_ij))
                         else:
-                            I_w[i*2 + x, j*2 + y] = I_ij
+                            I_w[i*2 + x, j*2 + y] = int(I_ij - omega * J[x, y] * np.average(W_ij))
+                    else:
+                        I_w[i*2 + x, j*2 + y] = I_ij
     watermarked_image = cv2.merge([I_w, U, V])
     final_image = cv2.cvtColor(watermarked_image, cv2.COLOR_YUV2RGB)
     return final_image
@@ -156,7 +148,7 @@ def create_saliency_map(image, superpixels, normalized_scores):
 def calculate_jnd_matrix(Y):
     J = np.zeros_like(Y)
     for i in range(Y.shape[0]):
-        for j in range(i+1, Y.shape[1]):
+        for j in range(i+1, Y.shape[0]):
             jnd = jensen_shannon_divergence(Y[i], Y[j])
             J[i, j] = J[j, i] = jnd
     return J
@@ -166,6 +158,8 @@ def jensen_shannon_divergence(p, q):
     return 0.5 * (entropy(p, m) + entropy(q, m))
 
 def entropy(p, q):
+    p = np.array(p) + 1e-9
+    q = np.array(q) + 1e-9
     return -np.sum(p * np.log2(q))
 
 def calculate_texture_complexity(block):
@@ -251,7 +245,7 @@ def estimate_omega(Y):
 
 if __name__ == '__main__':
     image = cv2.imread('ArtSnake/example.jpg')
-    watermark = cv2.imread('ArtSnake/watermark.png')
+    watermark = cv2.imread('ArtSnake/watermark2.png')
     final_image = watermark_embedding(image, watermark, debug=True)
     cv2.imshow('Watermarked Image', final_image)
     cv2.waitKey(0)
