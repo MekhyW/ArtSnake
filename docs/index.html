@@ -1,10 +1,24 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>ArtSnake</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen iFrame</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
 </head>
-<body width="100%" height="100%">
-
-    <iframe src="https://artsnake.readthedocs.io/en/latest/" width="100%" height="100%"></iframe>
-
+<body>
+    <iframe src="https://artsnake.readthedocs.io/en/latest/"></iframe>
 </body>
 </html>
