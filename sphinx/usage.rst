@@ -22,12 +22,13 @@ The `insert_watermark` function inserts a watermark into an image. This is the m
 
 .. code-block:: python
 
-    insert_watermark(img, watermark, measure_diff=measure_diff_padrao, watermark_remover=watermark_remover_padrao, watermark_detector=watermark_detector_padrao)
+    insert_watermark(img, watermark, n, measure_diff=measure_diff_padrao, watermark_remover=watermark_remover_padrao, watermark_detector=watermark_detector_padrao)
 
 **Arguments:**
 
 - `img` (numpy.ndarray): The image to insert the watermark into.
 - `watermark` (numpy.ndarray): The watermark image.
+- `n` (int): The number of iterations to perform the watermark random insertion process.
 - `measure_diff` (function, optional): The function to use for measuring differences between images. Defaults to `measure_diff_padrao`.
 - `watermark_remover` (function, optional): The function to use for removing watermarks from images. Defaults to `watermark_remover_padrao`.
 - `watermark_detector` (function, optional): The function to use for detecting watermarks in images. Defaults to `watermark_detector_padrao`.
