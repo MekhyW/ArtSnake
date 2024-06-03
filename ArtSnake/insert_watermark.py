@@ -121,6 +121,8 @@ def insert_watermark_with_rotation_and_position(img, watermark):
 
 def insert_watermark(img, watermark, n, measure_similarity=measure_similarity_ssim, watermark_detector= watermark_proba_prebuilt_from_opencv, watermark_remover=remove_watermark_prebuilt_from_opencv):
     #steps = [insert_watermark_pass, insert_watermark_simple, insert_watermark_simple_adaptive]
+    og_shape = img.shape
+    img, watermark = make_same_shape(img, watermark)
     steps = [insert_watermark_simple_adaptive]
     for i in range(n):
         steps.append(insert_watermark_with_rotation_and_position)
@@ -135,6 +137,7 @@ def insert_watermark(img, watermark, n, measure_similarity=measure_similarity_ss
         if score > best_score:
             best_score = score
             best_img = img1
+    best_img = cv2.resize(best_img, (og_shape[1], og_shape[0]))
     return best_img, best_score
 
 if __name__ == '__main__':
