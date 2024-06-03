@@ -69,6 +69,13 @@ def rotate_watermark(watermark):
     rotated_watermark = cv2.warpAffine(watermark, matrix, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0,0,0))
     return rotated_watermark
 
+def resize_watermark(watermark):
+    scale = random.uniform(0.3, 0.8)  # Resize between 30% to 80%
+    h, w = watermark.shape[:2]
+    new_h, new_w = int(h * scale), int(w * scale)
+    resized_watermark = cv2.resize(watermark, (new_w, new_h), interpolation=cv2.INTER_AREA)
+    return resized_watermark
+
 def change_watermark_position(watermark, img_shape):
     h_img, w_img = img_shape[:2]
     h_wm, w_wm = watermark.shape[:2]
@@ -106,15 +113,16 @@ def insert_watermark_simple_adaptive(img, watermark):
     return cv2.cvtColor(final_image, cv2.COLOR_RGB2BGR)
 
 def insert_watermark_with_rotation_and_position(img, watermark):
-    rotated_watermark = rotate_watermark(watermark)
+    resized_watermark = resize_watermark(watermark)
+    rotated_watermark = rotate_watermark(resized_watermark)
     positioned_watermark = change_watermark_position(rotated_watermark, img.shape)
     return insert_watermark_simple_adaptive(img, positioned_watermark)
 
 
-def insert_watermark(img, watermark, measure_similarity=measure_similarity_ssim, watermark_detector= watermark_proba_prebuilt_from_opencv, watermark_remover=remove_watermark_prebuilt_from_opencv):
+def insert_watermark(img, watermark, n, measure_similarity=measure_similarity_ssim, watermark_detector= watermark_proba_prebuilt_from_opencv, watermark_remover=remove_watermark_prebuilt_from_opencv):
     #steps = [insert_watermark_pass, insert_watermark_simple, insert_watermark_simple_adaptive]
-    steps = []
-    for i in range(10):
+    steps = [insert_watermark_simple_adaptive]
+    for i in range(n):
         steps.append(insert_watermark_with_rotation_and_position)
     best_img = None
     best_score = 0
